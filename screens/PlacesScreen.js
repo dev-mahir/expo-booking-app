@@ -2,14 +2,28 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import React, { useLayoutEffect, useState } from 'react'
 import { useNavigation, useRoute } from '@react-navigation/native'
 import FontAwesome from 'react-native-vector-icons/FontAwesome'
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import Octicons from 'react-native-vector-icons/Octicons'
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import { darkBlue, white } from '../constants/color'
 import PropertyCard from '../components/PropertyCard'
 import { BottomModal, ModalContent, ModalFooter, ModalTitle, SlideAnimation } from 'react-native-modals'
 
+
+const filters = [
+  {
+    id: "0",
+    filter: 'Low to High',
+  },
+  {
+    id: "1",
+    filter: 'High to Low',
+  },
+]
+
 const PlacesScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
+  const [selectedFilter, setSelectedFilter] = useState("")
 
 
   const data = [
@@ -479,16 +493,49 @@ const PlacesScreen = () => {
   const route = useRoute();
   const navigation = useNavigation();
 
-  const filters = [
-    {
-      id: "0",
-      filter:'const: Low to High',
-    },
-    {
-      id: "1",
-      filter:'const: High to Low',
-    },
-  ]
+
+  const searchPlaces = data?.filter(item => item.place === route.params.place);
+  const [sortedData, setSortedData] = useState(data);
+
+
+  const compare = (a, b) => {
+    if (a.newPrice > b.newPrice) {
+      return -1
+    }
+    if (a.newPrice < b.newPrice) {
+      return 1
+    }
+    return 0
+  }
+
+  const comparison = (a, b) => {
+    if (a.newPrice < b.newPrice) {
+      return -1
+    }
+    if (a.newPrice > b.newPrice) {
+      return 1
+    }
+    return 0
+  }
+
+
+  const applyFilter = (filter) => {
+    setModalVisible(false)
+    switch (filter) {
+      case 'High to Low':
+        searchPlaces.map(val => val.properties.sort(compare));
+        setSortedData(searchPlaces);
+        break;
+      case 'Low to High':
+        searchPlaces.map(val => val.properties.sort(comparison));
+        setSortedData(searchPlaces);
+        break;
+      default:
+        break;
+    }
+  }
+
+
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -505,12 +552,14 @@ const PlacesScreen = () => {
       ),
     })
   }, [])
+
+
   return (
     <View>
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, backgroundColor: white, paddingVertical: 10 }}>
 
         {/* sort  */}
-        <Pressable onPress={() =>setModalVisible(!modalVisible) }
+        <Pressable onPress={() => setModalVisible(!modalVisible)}
           style={{
             flexDirection: 'row', alignItems: 'center', gap: 10
           }}
@@ -520,6 +569,7 @@ const PlacesScreen = () => {
             style={{ fontSize: 15, fontWeight: '500', }}
           >Sort</Text>
         </Pressable>
+
 
         {/* filter  */}
         <Pressable
@@ -533,8 +583,12 @@ const PlacesScreen = () => {
           >Filter</Text>
         </Pressable>
 
-        {/* sort  */}
+
+        {/* map  */}
         <Pressable
+          onPress={() => navigation.navigate('Map', {
+            searchResults: searchPlaces
+          })}
           style={{
             flexDirection: 'row', alignItems: 'center', gap: 10
           }}
@@ -549,15 +603,8 @@ const PlacesScreen = () => {
 
 
 
-
-
-
-
-
-
-
       <ScrollView style={{ backgroundColor: "f5f5f5" }}>
-        {data?.filter(item => item.place === route.params.place).map(item => item.properties.map((property, index) => <PropertyCard
+        {sortedData?.filter(item => item.place === route.params.place).map(item => item.properties.map((property, index) => <PropertyCard
           key={index}
           rooms={route.params.rooms}
           children={route.params.children}
@@ -570,6 +617,8 @@ const PlacesScreen = () => {
 
 
 
+
+      {/* Bottom Filter modal  */}
       <BottomModal
         swipeThreshold={200}
         visible={modalVisible}
@@ -578,8 +627,15 @@ const PlacesScreen = () => {
         onTouchOutside={() => setModalVisible(!modalVisible)}
         swipeDirection={['up', 'down']}
         footer={<ModalFooter>
-          <Pressable style={{ paddingRight: 10, marginLeft: 'auto', marginRight: 'auto', marginVertical: 10 }}>
-            <Text>Apply</Text>
+          <Pressable
+            onPress={() => applyFilter(selectedFilter)}
+            style={{
+              paddingRight: 10,
+              marginLeft: 'auto',
+              marginRight: 'auto',
+              marginVertical: 15
+            }}>
+            <Text style={{ fontWeight: "600", fontSize: 18 }}>Apply</Text>
           </Pressable>
         </ModalFooter>}
         modalTitle={<ModalTitle title="Sort and Filter" />}
@@ -588,13 +644,25 @@ const PlacesScreen = () => {
         }
       >
 
-        
+
         <ModalContent title style={{ width: "100%", height: 280 }}>
-          <View style={{flexDirection: 'row'}}>
-            <View style={{marginVertical: 10, flex: 2, height: 260, borderRightWidth: 1}}>
-              <Text style={{textAlign: 'center'}}>Sort</Text>
+          <View style={{ flexDirection: 'row' }}>
+            <View style={{ marginVertical: 10, flex: 2, height: 260, borderRightWidth: 1 }}>
+              <Text style={{ textAlign: 'center' }}>Sort</Text>
             </View>
-            <View style={{flex: 3}}></View>
+            <View style={{ flex: 3, margin: 10 }}>
+
+              {filters.map((item, index) =>
+                <Pressable key={index}
+                  onPress={() => setSelectedFilter(item.filter)}
+                  style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 10 }}
+                >
+                  {selectedFilter.includes(item.filter) ? (<MaterialIcons name='stop-circle' color="green" size={22} />) : (<Octicons name='circle' color="gray" size={18} style={{ marginLeft: 2 }} />)}
+
+                  <Text style={{ fontSize: 16, fontWeight: "500", marginLeft: 6 }}>{item.filter}</Text>
+                </Pressable>
+              )}
+            </View>
           </View>
         </ModalContent>
 

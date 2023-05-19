@@ -1,12 +1,27 @@
 import { View, Text, Dimensions, Pressable, Image } from 'react-native'
 import React from 'react'
 import FontAwesome from 'react-native-vector-icons/FontAwesome'
+import { useNavigation } from '@react-navigation/native'
 
-const PropertyCard = ({ property, availableRooms, rooms, children, adults, selectedDates, }) => {
+const PropertyCard = ({ property, availableRooms, rooms, children, adults, date, }) => {
+  const navigation = useNavigation();
   const { width, height } = Dimensions.get('window');
   return (
     <View>
-      <Pressable style={{ flexDirection: 'row', margin: 15, backgroundColor: 'white' }}>
+      <Pressable
+        onPress={() => navigation.navigate('PropertyInfo', {
+          name: property.name,
+          rating: property.rating,
+          oldPrice: property.oldPrice,
+          newPrice: property.newPrice,
+          photos: property.photos,
+          adults: adults,
+          children: children,
+          rooms: rooms,
+          date: date,
+        })}
+        
+        style={{ flexDirection: 'row', margin: 15, backgroundColor: 'white' }}>
         <View>
           <Image style={{ height: height / 4, width: width - 280 }} source={{ uri: property.image }} />
         </View>
@@ -33,8 +48,7 @@ const PropertyCard = ({ property, availableRooms, rooms, children, adults, selec
           <Text style=
             {{ marginTop: 5, fontWeight: "700" }}>Price for 1 Night and {adults} adults</Text>
           <View>
-
-            <Text style={{ color: 'red', fontSize: 18, textDecorationStyle: 'line-through' }}>{property.oldPirce * adults}</Text>
+            <Text style={{ color: 'red', fontSize: 18 }}>{property.oldPirce * adults}</Text>
             <Text style={{ color: 'black', fontSize: 18, }}>{property.newPrice * adults}</Text>
           </View>
 

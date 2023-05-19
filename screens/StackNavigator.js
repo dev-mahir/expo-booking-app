@@ -10,6 +10,10 @@ import { NavigationContainer } from '@react-navigation/native';
 import UserScreen from './UserScreen';
 import SearchScreen from './SearchScreen';
 import PlacesScreen from './PlacesScreen';
+import MapScreen from './MapScreen';
+import PropertyInfo from './PropertyInfoScreen';
+import PropertyInfoScreen from './PropertyInfoScreen';
+import RoomsScreen from './RoomsScreen';
 
 
 const Tab = createBottomTabNavigator();
@@ -70,6 +74,9 @@ const StackNavigator = () => {
         <Stack.Screen name='Main' component={BottomTabs} options={{ headerShown: false }} />
         <Stack.Screen name='Search' component={SearchScreen} options={{ headerShown: false }} />
         <Stack.Screen name='Places' component={PlacesScreen}/>
+        <Stack.Screen name='Map' component={MapScreen}/>
+        <Stack.Screen name='PropertyInfo' component={PropertyInfoScreen}/>
+        <Stack.Screen name='Rooms' component={RoomsScreen}/>
       </Stack.Navigator>
     </NavigationContainer>
   )

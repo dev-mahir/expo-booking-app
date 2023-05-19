@@ -19,9 +19,6 @@ const HomeScreen = () => {
 
 
 
-
-
-
   const searchPlaces = (place) => {
     if (!route.params || !selectedDate) {
       showAlert()
